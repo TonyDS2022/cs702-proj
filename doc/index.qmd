@@ -2,6 +2,6 @@
 title: "[TBD] Frictions Frequency and Modality vs User Satifaction"
 ---
 
-This is a Quarto website.
+This project investigates how the frequency and modality of design frictions in social media feeds affect user satisfaction. We implement a content feed with configurable friction mechanisms — such as mini-games, pause screens, content feedback prompts, and interactive toggles — and compare content dwell time against an infinite-scroll control group.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+See the [Project Proposal](about.qmd) for details on the target paper, implementation scope, and evaluation methodology.

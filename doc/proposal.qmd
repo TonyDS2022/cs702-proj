@@ -1,0 +1,58 @@
+---
+title: "Project Proposal"
+bibliography: references.bib
+notice: |
+  @{ruiz2024designfrictionssocialmedia}
+---
+
+## Team Members
+
+- CHIA Jia Jin "Shawn"
+- TAN Wei Chien "Timothy"
+- ZENG Tianzhi "Tony"
+
+## Target Paper
+
+@ruiz2024designfrictionssocialmedia proposes design frictions as interventions to reduce mindless scrolling on social media, and evaluates their effect on content recall and user satisfaction. We intend to implement a variant of the proposed intervention and study its effect on user satisfaction.
+
+The interactive technology proposed in @ruiz2024designfrictionssocialmedia is a custom mobile application prototype of a fictitious social media platform, with two interface variants:
+
+- **Social media feed**: A vertical feed of posts (sourced and adapted from Reddit), each containing an image and text. Post content and ordering are identical across both interface variants.
+- **Reaction-based interface (intervention)**: Requires users to select one of four reactions ("Like", "Congratulations!", "Inspiring!", "Love it!") or press a "Not interested" button before the next post is revealed. Posts are delivered sequentially, one at a time.
+- **Infinite-scroll interface (control)**: Permits unrestricted scrolling with content loading dynamically as users scroll downward. No interaction is required to access subsequent posts.
+- **Memory recognition test**: An old-new discrimination task presented after the browsing session, where participants classify posts as previously seen or new, measuring hit rates and false alarm rates.
+- **Survey instruments**: Five-point Likert-scale questionnaires assessing frustration, attention, motivation, and interface satisfaction.
+- **Behavioral logging**: Records time-on-task duration and demographic data (age, gender, baseline social media usage).
+
+## Implementation Scope
+
+We intend to implement a variant of the proposed intervention, where the friction imposed on the user has varied frequencies and modalities. While we are still deliberating on the specific implementation, we have the following ideas on friction modalities:
+
+- **mini-game**: The user is required a play a 5-10 second mini-game before the next post is revealed.
+- **pause screen with quote**: The user is required to read a quote for 5-10 seconds before the next post is revealed.
+- **content feedback elicitation**: The user is required to rate the content on a 2-point scale before the next post is revealed.
+- **interactive button/toggle**: The user is required to press a button or toggle a switch before the next post is revealed.
+
+We will also vary the frequency of the friction mechanism. For example, we can have a friction mechanism that is applied to every 5 posts, or every 10 posts, or every 15 posts.
+
+We intend to enhance the implementation by sourcing content from other sources, such as Substack, newsletters, Moltbook, etc.
+
+Since we only intend to measure the impact of friction mechanisms on user satifaction, we will not implement a post-consumption survey. Our implementation will comprise of the following components:
+
+- **Content feed**: A varied content feed sourced from the Internet
+- **Friction-based interface (intervention)**: Users are presented with intentional friction mechanisms with varied modalities and frequencies as they scroll through the content feed.
+- **Infinite-scroll interface (control)**: A baseline interface with unrestricted scrolling and no friction, for comparison.
+- **Telemetry logging**: Records scroll activity, friction interaction events, content dwell time, and session metadata for analysis.
+
+## Evaluation Methodology
+
+We use content dwell time — the duration a user spends viewing each post — as an objective, behavioural proxy for user engagement and satisfaction. Unlike self-reported surveys, dwell time is captured passively through telemetry, reducing response bias and participant burden.
+
+Our evaluation follows a between-subjects design with the following groups:
+
+- **Control group**: Participants use the infinite-scroll interface with no friction. Dwell time per post is recorded as the baseline.
+- **Intervention groups**: Participants use the friction-based interface. Each group experiences a specific combination of friction modality and frequency. Dwell time per post is recorded excluding time spent on friction screens.
+
+We compare mean content dwell time between the control group and each intervention group. A statistically significant increase in dwell time in the intervention groups would suggest that friction mechanisms encourage more deliberate content consumption, which we interpret as a positive indicator of engagement quality. Conversely, a decrease may indicate that friction causes disengagement or frustration.
+
+This approach eliminates the need for post-consumption surveys, allowing us to evaluate the effect of friction mechanisms purely from observed behaviour.
