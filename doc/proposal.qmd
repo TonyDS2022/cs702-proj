@@ -13,46 +13,54 @@ notice: |
 
 ## Target Paper
 
-@ruiz2024designfrictionssocialmedia proposes design frictions as interventions to reduce mindless scrolling on social media, and evaluates their effect on content recall and user satisfaction. We intend to implement a variant of the proposed intervention and study its effect on user satisfaction.
+@ruiz2024designfrictionssocialmedia investigates whether introducing design frictions into social media interfaces can reduce mindless scrolling without excessively harming user experience. The paper presents a controlled between-subjects study comparing a conventional infinite-scroll feed with a reaction-based feed that requires users to actively respond to each post before accessing subsequent content. Drawing on the normative dissociation framework, the authors operationalize mindless scrolling as impaired memory recall and show that participants using the reaction-based interface exhibit significantly better recognition memory for viewed posts, indicating reduced dissociation and increased attentiveness. However, this cognitive benefit comes with a trade-off: over half of participants report frustration, and only a small minority express willingness to adopt such an interface in everyday use. The paper’s core contribution lies in empirically demonstrating this attention–satisfaction tension and articulating design implications that emphasize contextual and optional deployment of friction-based interfaces, particularly for goal-oriented or educational use cases rather than general-purpose social media browsing.
 
-The interactive technology proposed in @ruiz2024designfrictionssocialmedia is a custom mobile application prototype of a fictitious social media platform, with two interface variants:
+### Architecture of Interactive Technology Described in Paper
 
-- **Social media feed**: A vertical feed of posts (sourced and adapted from Reddit), each containing an image and text. Post content and ordering are identical across both interface variants.
-- **Reaction-based interface (intervention)**: Requires users to select one of four reactions ("Like", "Congratulations!", "Inspiring!", "Love it!") or press a "Not interested" button before the next post is revealed. Posts are delivered sequentially, one at a time.
-- **Infinite-scroll interface (control)**: Permits unrestricted scrolling with content loading dynamically as users scroll downward. No interaction is required to access subsequent posts.
-- **Memory recognition test**: An old-new discrimination task presented after the browsing session, where participants classify posts as previously seen or new, measuring hit rates and false alarm rates.
+The system is organized as a small set of modular components that together support controlled content presentation, interaction manipulation, and measurement of user behavior and cognition. At a high level, the architecture consists of a mobile application shell, interchangeable feed interaction mechanisms, and supporting measurement modules for memory, subjective experience, and behavioral logging. The major components of the interactive technology are outlined below.
+
+- **Social media feed**: A vertical feed of posts sourced and adapted from Reddit, each containing an image and accompanying text. Post content and ordering are identical across both interface variants.
+- **Reaction-based interface (intervention)**: A sequential interaction mechanism that requires users to select one of four reactions (“Like,” “Congratulations!”, “Inspiring!”, “Love it!”) or press a “Not interested” button before the next post is revealed.
+- **Infinite-scroll interface (control)**: An unrestricted scrolling mechanism in which content is dynamically loaded as users scroll downward, with no interaction required to access subsequent posts.
+- **Memory recognition test**: An old–new discrimination task administered after the browsing session, where participants classify posts as previously seen or new to derive hit rates and false alarm rates.
 - **Survey instruments**: Five-point Likert-scale questionnaires assessing frustration, attention, motivation, and interface satisfaction.
-- **Behavioral logging**: Records time-on-task duration and demographic data (age, gender, baseline social media usage).
+- **Behavioral logging**: Instrumentation that records time-on-task and demographic information, including age, gender, and baseline social media usage.
 
 ## Implementation Scope
 
-We intend to implement a variant of the proposed intervention, where the friction imposed on the user has varied frequencies and modalities. While we are still deliberating on the specific implementation, we have the following ideas on friction modalities:
+This project explores the design and implementation of *soft friction* mechanisms for content browsing interfaces, inspired by prior work on design frictions in social media but oriented toward practical, user-tolerable interaction design. Rather than replicating the reaction-based interface proposed by Ruiz et al., the goal is to identify a middle ground between unrestricted infinite scroll and compulsory per-item interaction—introducing gentle interruptions that encourage more intentional browsing without inducing excessive frustration or disengagement. Consistent with the findings of Ruiz et al., this project takes as given that introducing friction can improve attentiveness and recall; the focus therefore shifts from establishing cognitive benefit to identifying friction designs that remain acceptable and usable in everyday browsing contexts.
 
-- **mini-game**: The user is required a play a 5-10 second mini-game before the next post is revealed.
-- **pause screen with quote**: The user is required to read a quote for 5-10 seconds before the next post is revealed.
-- **content feedback elicitation**: The user is required to rate the content on a 2-point scale before the next post is revealed.
-- **interactive button/toggle**: The user is required to press a button or toggle a switch before the next post is revealed.
+To this end, we will implement a friction-based browsing interface in which intentional friction is introduced intermittently and in varied forms. Rather than exhaustively implementing all possible friction mechanisms, the project will focus on **two or more representative friction modalities** that differ in interaction style and perceived intrusiveness. These friction mechanisms are designed to be lightweight, brief, and easily understandable, functioning as momentary pauses rather than hard barriers. The project explores multiple *friction modalities* to understand how different interaction textures affect perceived user satisfaction:
 
-We will also vary the frequency of the friction mechanism. For example, we can have a friction mechanism that is applied to every 5 posts, or every 10 posts, or every 15 posts.
+- **Interactive button or toggle**: A low-effort interaction where users press a button or toggle a switch to continue browsing, serving as a minimal motor-based interruption.
+- **Content feedback elicitation**: A simple two-point rating that allows users to provide lightweight feedback on the content before proceeding, maintaining relevance to the browsing task.
+- **Pause screen with quote**: A short, time-limited pause (5–10 seconds) displaying a neutral quote or prompt, intended to create a reflective break without requiring active input.
+- **Mini-game interaction**: A brief, optional playful interaction (5–10 seconds) designed as a lighthearted pause rather than a cognitively demanding task.
 
-We intend to enhance the implementation by sourcing content from other sources, such as Substack, newsletters, Moltbook, etc.
+In addition to modality, the *frequency* of friction introduction will be varied to further reduce disruption. Friction may be applied periodically (e.g., every 5, 10, or 15 posts) rather than on every item, allowing the interface to retain a largely fluid browsing experience while still introducing moments of interruption.
 
-Since we only intend to measure the impact of friction mechanisms on user satifaction, we will not implement a post-consumption survey. Our implementation will comprise of the following components:
+To approximate real-world browsing conditions and support ecological validity, the content feed will aggregate material from multiple online sources (e.g., blogs, newsletters, long-form posts), reflecting the heterogeneous nature of contemporary content consumption. Content diversity is treated as a feature rather than a controlled variable, as the project prioritizes user experience over experimental isolation.
 
-- **Content feed**: A varied content feed sourced from the Internet
-- **Friction-based interface (intervention)**: Users are presented with intentional friction mechanisms with varied modalities and frequencies as they scroll through the content feed.
-- **Infinite-scroll interface (control)**: A baseline interface with unrestricted scrolling and no friction, for comparison.
-- **Telemetry logging**: Records scroll activity, friction interaction events, content dwell time, and session metadata for analysis.
+Evaluation will focus on *user satisfaction and interaction behavior* rather than cognitive outcomes such as memory recall. As the primary objective is to design friction mechanisms that users are willing to tolerate in everyday use, the implementation emphasizes telemetry-based measures, including scrolling behavior, friction interaction events, dwell time, and session characteristics.
+
+The final system will comprise the following components:
+
+- **Content feed**: A scrollable feed aggregating varied online content.
+- **Friction-based interface (intervention)**: A browsing interface that introduces soft friction mechanisms with configurable modalities and frequencies.
+- **Infinite-scroll interface (control)**: A baseline interface with unrestricted scrolling and no friction, used for comparison.
+- **Telemetry logging**: Instrumentation to capture scroll activity, friction interactions, content dwell time, and session metadata for subsequent analysis.
 
 ## Evaluation Methodology
 
-We use content dwell time — the duration a user spends viewing each post — as an objective, behavioural proxy for user engagement and satisfaction. Unlike self-reported surveys, dwell time is captured passively through telemetry, reducing response bias and participant burden.
+The evaluation adopts a behaviour-driven approach aligned with the project’s design-oriented objectives. Whereas the target paper operationalizes mindless scrolling through post-consumption memory recall and self-reported experience, this project prioritizes *in-situ interaction behaviour* as the primary signal of user engagement and satisfaction. Building on prior evidence that friction can improve attentiveness and recall, the evaluation focuses on assessing whether softer and more intermittent friction designs remain acceptable during everyday browsing, rather than on further validating cognitive outcomes under controlled experimental conditions.
 
-Our evaluation follows a between-subjects design with the following groups:
+Content dwell time — the duration a user spends viewing each content item — is used as the primary behavioural metric. Dwell time is captured passively through telemetry and serves as an objective proxy for engagement quality and attentiveness. Compared to post-session surveys or recognition tasks, this measure reduces participant burden, avoids response bias, and more closely reflects naturalistic browsing behaviour in real-world interfaces.
 
-- **Control group**: Participants use the infinite-scroll interface with no friction. Dwell time per post is recorded as the baseline.
-- **Intervention groups**: Participants use the friction-based interface. Each group experiences a specific combination of friction modality and frequency. Dwell time per post is recorded excluding time spent on friction screens.
+The evaluation follows a between-subjects design comprising the following conditions:
 
-We compare mean content dwell time between the control group and each intervention group. A statistically significant increase in dwell time in the intervention groups would suggest that friction mechanisms encourage more deliberate content consumption, which we interpret as a positive indicator of engagement quality. Conversely, a decrease may indicate that friction causes disengagement or frustration.
+- **Control group**: Participants interact with a standard infinite-scroll interface with no friction. Dwell time per content item is recorded to establish a baseline browsing pattern.
+- **Intervention groups**: Participants interact with the friction-based interface. Each group is assigned a specific combination of friction modality and friction frequency. Dwell time per content item is recorded, excluding time spent on friction screens, to isolate attention directed toward the content itself.
 
-This approach eliminates the need for post-consumption surveys, allowing us to evaluate the effect of friction mechanisms purely from observed behaviour.
+Mean dwell time per content item is compared between the control group and each intervention group. An increase in dwell time relative to the control is interpreted as evidence that soft friction mechanisms encourage more deliberate and attentive consumption without fully interrupting the browsing flow. Conversely, a reduction in dwell time may indicate that the applied friction is perceived as disruptive or frustrating, leading to disengagement.
+
+By relying on telemetry-based behavioural measures rather than post-consumption surveys or memory tests, the evaluation methodology reflects a deliberate shift from the target paper’s experimental framework toward practical interaction design assessment. This approach prioritizes feasibility, usability, and satisfaction in real-world use, complementing prior work that establishes the cognitive benefits of friction-based interfaces.
