@@ -20,4 +20,13 @@ format:
     documentclass: article
     colorlinks: true
     geometry:
-      - margin=0.8in
+      - margin=0.5in
+    linestretch: 1.0
+    include-in-header:
+      text: |
+        \usepackage{enumitem}
+        \setlist{nosep,leftmargin=*}
+        \usepackage{titling}
+        \setlength{\droptitle}{-3em}
+        \pretitle{\begin{center}\Large\bfseries}
+        \posttitle{\end{center}\vspace{-0.5em}}
