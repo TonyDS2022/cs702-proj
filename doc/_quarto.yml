@@ -16,8 +16,8 @@ format:
     code-fold: show
     code-tools: true
   pdf:
-    toc: true
+    toc: false
     documentclass: article
     colorlinks: true
     geometry:
-      - margin=1in
+      - margin=0.8in
