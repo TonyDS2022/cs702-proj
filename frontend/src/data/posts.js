@@ -322,7 +322,7 @@ export function buildMemoryTestPool(seenPostIds) {
 
   const oldItems = EXPOSURE_POSTS
     .filter(p => seenSet.has(p.id))
-    .slice(0, 20)
+    .slice(0, 5)
     .map(p => ({ ...p, memoryLabel: 'old' }));
 
   const newItems = POSTS
