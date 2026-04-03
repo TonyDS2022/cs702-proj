@@ -4,7 +4,7 @@ A web application that reproduces the infinite social media scrolling experiment
 
 > Ruiz, N., Molina León, G., & Heuer, H. (2024). **Design Frictions on Social Media: Balancing Reduced Mindless Scrolling and User Satisfaction.** *MuC '24*, Karlsruhe, Germany.
 
-Built for CS702. Implements the paper's original reaction-based friction condition alongside three additional friction modalities proposed by the team, all within a controlled between-subjects study design.
+Built for CS702. Implements the paper's original reaction-based friction condition alongside five additional friction modalities proposed by the team, all within a controlled between-subjects study design.
 
 ---
 
@@ -112,9 +112,19 @@ The study uses a **between-subjects design**: each participant is assigned to ex
 
 ---
 
+### Adaptive Slowdown — `?condition=slowdown&freq=5`
+
+**What it is:** A non-modal friction that leaves the feed visible but temporarily reduces downward scroll speed when the participant has already skimmed through at least N posts and is still scrolling quickly. Instead of interrupting with a dialog, the feed itself becomes resistant for a few seconds.
+
+**Why it's in the study:** This condition tests whether friction can be embedded directly into the scrolling mechanic and only appear during bursty, potentially mindless browsing. It is less explicit than a modal prompt, but still introduces a noticeable cost to rapid over-scrolling.
+
+**What to expect:** Normal browsing feels unchanged most of the time. If you speed through enough posts in a burst, a small banner appears and the feed scrolls more slowly for about 4 seconds before returning to normal.
+
+---
+
 ## The `freq` Parameter
 
-For all conditions except `reaction` (which fires on every post), `freq` controls how often friction appears — every N posts.
+For all modal conditions except `reaction` (which fires on every post), `freq` controls how often friction appears — every N posts. For `slowdown`, `freq` is the minimum number of posts the user must skim before rapid scrolling can trigger the temporary slowdown.
 
 | `freq` value | Friction fires at post… | Friction shown over 30 posts |
 |:---:|---|:---:|
@@ -133,7 +143,7 @@ Each participant goes through exactly these steps in order:
 
 1. **Consent** — reads study information, ticks the agreement checkbox
 2. **Demographics** — age, gender, daily social media usage, platforms used
-3. **Feed instructions** — brief explanation (friction condition participants are told interactions may appear)
+3. **Feed instructions** — brief explanation (friction condition participants are told prompts or feed effects may appear)
 4. **Feed browsing** — 30 posts, exposure phase (~8–20 min depending on condition)
 5. **Stroop task** — 30-second colour-naming distractor to reduce recency bias
 6. **Memory recognition test** — 20 old posts + 6 new distractors, shuffled; participant presses Old / New for each; response time is recorded
@@ -160,7 +170,7 @@ All of these are logged client-side throughout the session and submitted to the 
 
 ## Participant Assignment (for the actual study)
 
-Generate a link for each participant with a pre-assigned condition. A simple counterbalancing scheme for 12 participants across 6 conditions:
+Generate a link for each participant with a pre-assigned condition. A simple counterbalancing scheme for 14 participants across 7 conditions:
 
 ```
 P01  http://localhost:5173/?condition=control&freq=5
@@ -169,12 +179,14 @@ P03  http://localhost:5173/?condition=button&freq=5
 P04  http://localhost:5173/?condition=feedback&freq=5
 P05  http://localhost:5173/?condition=pause&freq=5
 P06  http://localhost:5173/?condition=minigame&freq=5
-P07  http://localhost:5173/?condition=control
-P08  http://localhost:5173/?condition=reaction
-P09  http://localhost:5173/?condition=button&freq=5
-P10  http://localhost:5173/?condition=feedback&freq=5
-P11  http://localhost:5173/?condition=pause&freq=5
-P12  http://localhost:5173/?condition=minigame&freq=5
+P07  http://localhost:5173/?condition=slowdown&freq=5
+P08  http://localhost:5173/?condition=control
+P09  http://localhost:5173/?condition=reaction
+P10  http://localhost:5173/?condition=button&freq=5
+P11  http://localhost:5173/?condition=feedback&freq=5
+P12  http://localhost:5173/?condition=pause&freq=5
+P13  http://localhost:5173/?condition=minigame&freq=5
+P14  http://localhost:5173/?condition=slowdown&freq=5
 ```
 
 Once the backend is running, each session is stored in PostgreSQL under a randomly generated participant ID (e.g. `P3A7F1C2`). The researcher never sees personal information.
