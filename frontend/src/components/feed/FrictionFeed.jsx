@@ -41,8 +41,8 @@ import useScrollTracker from "../../hooks/useScrollTracker";
 
 const POSTS_PER_PAGE = 5;
 const SLOWDOWN_DURATION_MS = 2500;
-const SLOWDOWN_FACTOR = 0.55;
-const SLOWDOWN_TOUCH_FACTOR = 0.72;
+const SLOWDOWN_FACTOR = 0.9;
+const SLOWDOWN_TOUCH_FACTOR = 0.9;
 const SLOWDOWN_EASING = 0.22;
 const SLOWDOWN_VELOCITY_THRESHOLD = 0.9;
 
