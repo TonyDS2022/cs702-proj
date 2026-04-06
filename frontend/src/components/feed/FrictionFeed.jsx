@@ -42,17 +42,8 @@ import useScrollTracker from "../../hooks/useScrollTracker";
 const POSTS_PER_PAGE = 5;
 const SLOWDOWN_DURATION_MS = 2500;
 const SLOWDOWN_FACTOR = 0.7;
-const SLOWDOWN_TOUCH_FACTOR = 0.55;
+const SLOWDOWN_EASING = 0.5;
 const SLOWDOWN_VELOCITY_THRESHOLD = 0.9;
-const TOUCH_MOMENTUM_DECAY = 0.88;
-const TOUCH_MOMENTUM_MIN_VELOCITY = 0.05;
-
-function getNumericUrlParam(name, fallback, min, max) {
-  const params = new URLSearchParams(window.location.search);
-  const rawValue = Number.parseFloat(params.get(name) ?? "");
-  if (!Number.isFinite(rawValue)) return fallback;
-  return Math.min(max, Math.max(min, rawValue));
-}
 
 const FRICTION_COMPONENT = {
   reaction: ReactionFriction,
@@ -279,108 +270,92 @@ export default function FrictionFeed({
     if (!el || !isSlowdownCondition) return;
 
     let lastTouchY = null;
-    let lastTouchTime = 0;
-    let touchVelocity = 0;
-    let momentumFrameId = null;
-    const touchMomentumDecay = getNumericUrlParam(
-      "decay",
-      TOUCH_MOMENTUM_DECAY,
-      0,
-      0.99,
-    );
+    let animationFrameId = null;
+    let isAnimatingScroll = false;
+    let targetScrollTop = el.scrollTop;
 
     const getMaxScrollTop = () => Math.max(0, el.scrollHeight - el.clientHeight);
     const clampScrollTop = (nextScrollTop) =>
       Math.min(getMaxScrollTop(), Math.max(0, nextScrollTop));
 
-    const stopMomentum = () => {
-      if (momentumFrameId != null) {
-        cancelAnimationFrame(momentumFrameId);
-        momentumFrameId = null;
+    const stopAnimation = () => {
+      if (animationFrameId != null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+
+    const animateTowardsTarget = () => {
+      animationFrameId = null;
+
+      const currentScrollTop = el.scrollTop;
+      const distance = targetScrollTop - currentScrollTop;
+      if (Math.abs(distance) < 0.5) {
+        if (currentScrollTop !== targetScrollTop) {
+          isAnimatingScroll = true;
+          el.scrollTop = targetScrollTop;
+          isAnimatingScroll = false;
+        }
+        return;
+      }
+
+      isAnimatingScroll = true;
+      el.scrollTop = currentScrollTop + (distance * SLOWDOWN_EASING);
+      isAnimatingScroll = false;
+      animationFrameId = requestAnimationFrame(animateTowardsTarget);
+    };
+
+    const ensureAnimation = () => {
+      if (animationFrameId == null) {
+        animationFrameId = requestAnimationFrame(animateTowardsTarget);
       }
     };
 
     const queueDelta = (delta) => {
       if (Math.abs(delta) < 0.5) return;
       const factor = delta > 0 ? SLOWDOWN_FACTOR : 1;
-      el.scrollTop = clampScrollTop(el.scrollTop + (delta * factor));
-    };
-
-    const startMomentum = () => {
-      stopMomentum();
-      let frameVelocity = touchVelocity * 16;
-      if (Math.abs(frameVelocity) < TOUCH_MOMENTUM_MIN_VELOCITY) return;
-
-      const step = () => {
-        if (!slowdownActiveRef.current) {
-          momentumFrameId = null;
-          return;
-        }
-
-        if (Math.abs(frameVelocity) < TOUCH_MOMENTUM_MIN_VELOCITY) {
-          momentumFrameId = null;
-          return;
-        }
-
-        const nextScrollTop = clampScrollTop(el.scrollTop + frameVelocity);
-        if (nextScrollTop === el.scrollTop) {
-          momentumFrameId = null;
-          return;
-        }
-
-        el.scrollTop = nextScrollTop;
-        frameVelocity *= touchMomentumDecay;
-        momentumFrameId = requestAnimationFrame(step);
-      };
-
-      momentumFrameId = requestAnimationFrame(step);
+      targetScrollTop = clampScrollTop(targetScrollTop + (delta * factor));
+      ensureAnimation();
     };
 
     const handleWheel = (event) => {
       if (!slowdownActiveRef.current || event.deltaY === 0) return;
       event.preventDefault();
-      stopMomentum();
       queueDelta(event.deltaY);
     };
 
     const handleTouchStart = (event) => {
-      if (!slowdownActiveRef.current) return;
-      stopMomentum();
       lastTouchY = event.touches[0]?.clientY ?? null;
-      lastTouchTime = Date.now();
-      touchVelocity = 0;
     };
 
     const handleTouchMove = (event) => {
-      if (!slowdownActiveRef.current) return;
-
       const currentY = event.touches[0]?.clientY;
       if (currentY == null) return;
       if (lastTouchY == null) {
         lastTouchY = currentY;
-        lastTouchTime = Date.now();
         return;
       }
 
-      const now = Date.now();
       const delta = lastTouchY - currentY;
-      const dt = Math.max(1, now - lastTouchTime);
-      if (delta !== 0) {
+      if (slowdownActiveRef.current && delta !== 0) {
         event.preventDefault();
-        const appliedDelta = delta > 0 ? delta * SLOWDOWN_TOUCH_FACTOR : delta;
-        el.scrollTop = clampScrollTop(el.scrollTop + appliedDelta);
-        touchVelocity = appliedDelta / dt;
+        queueDelta(delta);
       }
 
       lastTouchY = currentY;
-      lastTouchTime = now;
     };
 
     const handleTouchEnd = () => {
-      if (!slowdownActiveRef.current) return;
-      startMomentum();
       lastTouchY = null;
-      lastTouchTime = 0;
+    };
+
+    const handleNativeScroll = () => {
+      if (isAnimatingScroll) return;
+
+      targetScrollTop = el.scrollTop;
+      if (!slowdownActiveRef.current) {
+        stopAnimation();
+      }
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
@@ -388,14 +363,16 @@ export default function FrictionFeed({
     el.addEventListener("touchmove", handleTouchMove, { passive: false });
     el.addEventListener("touchend", handleTouchEnd, { passive: true });
     el.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+    el.addEventListener("scroll", handleNativeScroll, { passive: true });
 
     return () => {
-      stopMomentum();
+      stopAnimation();
       el.removeEventListener("wheel", handleWheel);
       el.removeEventListener("touchstart", handleTouchStart);
       el.removeEventListener("touchmove", handleTouchMove);
       el.removeEventListener("touchend", handleTouchEnd);
       el.removeEventListener("touchcancel", handleTouchEnd);
+      el.removeEventListener("scroll", handleNativeScroll);
     };
   }, [isSlowdownCondition]);
 
