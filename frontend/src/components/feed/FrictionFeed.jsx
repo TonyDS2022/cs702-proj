@@ -42,8 +42,9 @@ import useScrollTracker from "../../hooks/useScrollTracker";
 const POSTS_PER_PAGE = 5;
 const SLOWDOWN_DURATION_MS = 2500;
 const SLOWDOWN_FACTOR = 0.55;
+const SLOWDOWN_TOUCH_FACTOR = 0.72;
 const SLOWDOWN_EASING = 0.22;
-const SLOWDOWN_VELOCITY_THRESHOLD = 1.1;
+const SLOWDOWN_VELOCITY_THRESHOLD = 0.9;
 
 const FRICTION_COMPONENT = {
   reaction: ReactionFriction,
@@ -311,9 +312,9 @@ export default function FrictionFeed({
       }
     };
 
-    const queueDelta = (delta) => {
+    const queueDelta = (delta, factorOverride) => {
       if (Math.abs(delta) < 0.5) return;
-      const factor = delta > 0 ? SLOWDOWN_FACTOR : 1;
+      const factor = delta > 0 ? (factorOverride ?? SLOWDOWN_FACTOR) : 1;
       targetScrollTop = clampScrollTop(targetScrollTop + (delta * factor));
       ensureAnimation();
     };
@@ -339,7 +340,7 @@ export default function FrictionFeed({
       const delta = lastTouchY - currentY;
       if (slowdownActiveRef.current && delta !== 0) {
         event.preventDefault();
-        queueDelta(delta);
+        queueDelta(delta, SLOWDOWN_TOUCH_FACTOR);
       }
 
       lastTouchY = currentY;
