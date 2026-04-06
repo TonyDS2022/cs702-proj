@@ -42,7 +42,10 @@ import useScrollTracker from "../../hooks/useScrollTracker";
 const POSTS_PER_PAGE = 5;
 const SLOWDOWN_DURATION_MS = 2500;
 const SLOWDOWN_FACTOR = 0.7;
+const SLOWDOWN_TOUCH_FACTOR = 0.7;
 const SLOWDOWN_VELOCITY_THRESHOLD = 0.9;
+const TOUCH_MOMENTUM_DECAY = 0.92;
+const TOUCH_MOMENTUM_MIN_VELOCITY = 0.25;
 
 const FRICTION_COMPONENT = {
   reaction: ReactionFriction,
@@ -268,9 +271,21 @@ export default function FrictionFeed({
     const el = containerRef2.current;
     if (!el || !isSlowdownCondition) return;
 
+    let lastTouchY = null;
+    let lastTouchTime = 0;
+    let touchVelocity = 0;
+    let momentumFrameId = null;
+
     const getMaxScrollTop = () => Math.max(0, el.scrollHeight - el.clientHeight);
     const clampScrollTop = (nextScrollTop) =>
       Math.min(getMaxScrollTop(), Math.max(0, nextScrollTop));
+
+    const stopMomentum = () => {
+      if (momentumFrameId != null) {
+        cancelAnimationFrame(momentumFrameId);
+        momentumFrameId = null;
+      }
+    };
 
     const queueDelta = (delta) => {
       if (Math.abs(delta) < 0.5) return;
@@ -278,16 +293,96 @@ export default function FrictionFeed({
       el.scrollTop = clampScrollTop(el.scrollTop + (delta * factor));
     };
 
+    const startMomentum = () => {
+      stopMomentum();
+      let frameVelocity = touchVelocity * 16;
+      if (Math.abs(frameVelocity) < TOUCH_MOMENTUM_MIN_VELOCITY) return;
+
+      const step = () => {
+        if (!slowdownActiveRef.current) {
+          momentumFrameId = null;
+          return;
+        }
+
+        if (Math.abs(frameVelocity) < TOUCH_MOMENTUM_MIN_VELOCITY) {
+          momentumFrameId = null;
+          return;
+        }
+
+        const nextScrollTop = clampScrollTop(el.scrollTop + frameVelocity);
+        if (nextScrollTop === el.scrollTop) {
+          momentumFrameId = null;
+          return;
+        }
+
+        el.scrollTop = nextScrollTop;
+        frameVelocity *= TOUCH_MOMENTUM_DECAY;
+        momentumFrameId = requestAnimationFrame(step);
+      };
+
+      momentumFrameId = requestAnimationFrame(step);
+    };
+
     const handleWheel = (event) => {
       if (!slowdownActiveRef.current || event.deltaY === 0) return;
       event.preventDefault();
+      stopMomentum();
       queueDelta(event.deltaY);
     };
 
+    const handleTouchStart = (event) => {
+      if (!slowdownActiveRef.current) return;
+      stopMomentum();
+      lastTouchY = event.touches[0]?.clientY ?? null;
+      lastTouchTime = Date.now();
+      touchVelocity = 0;
+    };
+
+    const handleTouchMove = (event) => {
+      if (!slowdownActiveRef.current) return;
+
+      const currentY = event.touches[0]?.clientY;
+      if (currentY == null) return;
+      if (lastTouchY == null) {
+        lastTouchY = currentY;
+        lastTouchTime = Date.now();
+        return;
+      }
+
+      const now = Date.now();
+      const delta = lastTouchY - currentY;
+      const dt = Math.max(1, now - lastTouchTime);
+      if (delta !== 0) {
+        event.preventDefault();
+        const appliedDelta = delta > 0 ? delta * SLOWDOWN_TOUCH_FACTOR : delta;
+        el.scrollTop = clampScrollTop(el.scrollTop + appliedDelta);
+        touchVelocity = appliedDelta / dt;
+      }
+
+      lastTouchY = currentY;
+      lastTouchTime = now;
+    };
+
+    const handleTouchEnd = () => {
+      if (!slowdownActiveRef.current) return;
+      startMomentum();
+      lastTouchY = null;
+      lastTouchTime = 0;
+    };
+
     el.addEventListener("wheel", handleWheel, { passive: false });
+    el.addEventListener("touchstart", handleTouchStart, { passive: true });
+    el.addEventListener("touchmove", handleTouchMove, { passive: false });
+    el.addEventListener("touchend", handleTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", handleTouchEnd, { passive: true });
 
     return () => {
+      stopMomentum();
       el.removeEventListener("wheel", handleWheel);
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+      el.removeEventListener("touchend", handleTouchEnd);
+      el.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [isSlowdownCondition]);
 
@@ -327,7 +422,7 @@ export default function FrictionFeed({
         className="feed-container"
         role="feed"
         aria-label="Social media feed"
-        style={{ touchAction: "pan-y" }}
+        style={{ touchAction: slowdownVisible ? "none" : "pan-y" }}
       >
         {/* Progress bar */}
         <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-2 flex items-center justify-between">
