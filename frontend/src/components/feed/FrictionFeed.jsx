@@ -44,8 +44,15 @@ const SLOWDOWN_DURATION_MS = 2500;
 const SLOWDOWN_FACTOR = 0.7;
 const SLOWDOWN_TOUCH_FACTOR = 0.7;
 const SLOWDOWN_VELOCITY_THRESHOLD = 0.9;
-const TOUCH_MOMENTUM_DECAY = 0.92;
+const TOUCH_MOMENTUM_DECAY = 0.6;
 const TOUCH_MOMENTUM_MIN_VELOCITY = 0.25;
+
+function getNumericUrlParam(name, fallback, min, max) {
+  const params = new URLSearchParams(window.location.search);
+  const rawValue = Number.parseFloat(params.get(name) ?? "");
+  if (!Number.isFinite(rawValue)) return fallback;
+  return Math.min(max, Math.max(min, rawValue));
+}
 
 const FRICTION_COMPONENT = {
   reaction: ReactionFriction,
@@ -275,6 +282,12 @@ export default function FrictionFeed({
     let lastTouchTime = 0;
     let touchVelocity = 0;
     let momentumFrameId = null;
+    const touchMomentumDecay = getNumericUrlParam(
+      "decay",
+      TOUCH_MOMENTUM_DECAY,
+      0,
+      0.99,
+    );
 
     const getMaxScrollTop = () => Math.max(0, el.scrollHeight - el.clientHeight);
     const clampScrollTop = (nextScrollTop) =>
@@ -316,7 +329,7 @@ export default function FrictionFeed({
         }
 
         el.scrollTop = nextScrollTop;
-        frameVelocity *= TOUCH_MOMENTUM_DECAY;
+        frameVelocity *= touchMomentumDecay;
         momentumFrameId = requestAnimationFrame(step);
       };
 
