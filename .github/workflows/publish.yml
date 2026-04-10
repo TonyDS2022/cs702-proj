@@ -25,7 +25,7 @@ jobs:
           tinytex: true
 
       - name: Render site (using frozen computation results)
-        run: quarto render doc/ --no-execute
+        run: quarto render doc/
 
       - uses: actions/upload-pages-artifact@v3
         with:
