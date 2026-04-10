@@ -1,6 +1,9 @@
 project:
   type: website
 
+execute:
+  freeze: auto
+
 website:
   title: "[TBD] Frictions Frequency and Modality vs User Satifaction"
   navbar:
