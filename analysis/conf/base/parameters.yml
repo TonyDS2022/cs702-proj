@@ -1,0 +1,9 @@
+# Baseline parameters derived from datagen/config.yaml control condition
+# Used as reference when no control group exists in the collected data
+baseline_dprime: 0.80
+baseline_satisfaction: 3.8
+baseline_frustration: 1.6
+
+# Benchmarks from the original paper (Ruiz et al., 2024)
+paper_dprime_benchmark: 2.89
+paper_pct_frustrated_benchmark: 0.53
