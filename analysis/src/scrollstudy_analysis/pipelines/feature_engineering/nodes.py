@@ -24,6 +24,8 @@ def compute_participant_features(
     features = features.merge(dprime_df, on="session_id", how="left")
     features = features.merge(survey_df, on="session_id", how="left")
     features = features.merge(dwell_df, on="session_id", how="left")
+    scroll_df = _aggregate_scroll_bandwidth(post_views)
+    features = features.merge(scroll_df, on="session_id", how="left")
     features = features.merge(usage_df, on="session_id", how="left")
 
     return features
@@ -118,6 +120,22 @@ def _aggregate_dwell(post_views: pd.DataFrame) -> pd.DataFrame:
         .mean()
         .reset_index()
         .rename(columns={"dwell_ms": "mean_dwell_ms"})
+    )
+
+
+def _aggregate_scroll_bandwidth(post_views: pd.DataFrame) -> pd.DataFrame:
+    """Mean scroll depth per participant (scroll bandwidth proxy)."""
+    post_views = post_views.copy()
+    post_views["session_id"] = post_views["session_id"].astype(str)
+    if "scroll_depth" not in post_views.columns or post_views["scroll_depth"].dropna().empty:
+        df = post_views[["session_id"]].drop_duplicates()
+        df["scroll_bandwidth"] = np.nan
+        return df
+    return (
+        post_views.groupby("session_id")["scroll_depth"]
+        .mean()
+        .reset_index()
+        .rename(columns={"scroll_depth": "scroll_bandwidth"})
     )
 
 
