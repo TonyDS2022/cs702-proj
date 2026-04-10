@@ -154,7 +154,7 @@ print(f"""Data were available for {n_conditions} conditions: content feedback (n
 **Scroll bandwidth.** Mean scroll depth was {fb['scroll_bandwidth_mean']:.2f} (SE = {fb['scroll_bandwidth_se']:.2f}) for feedback and {sd['scroll_bandwidth_mean']:.2f} (SE = {sd['scroll_bandwidth_se']:.2f}) for slowdown, suggesting similar browsing thoroughness across conditions.""")
 ```
 
-![RQ1: d', % Frustrated, and Scroll Bandwidth by Condition](../analysis/output/rq1_dprime_frustration.png){#fig-rq1}
+![RQ1: d', % Frustrated, and Scroll Bandwidth by Condition](images/rq1_dprime_frustration.png){#fig-rq1}
 
 ### RQ2: Frequency Interaction
 
@@ -178,7 +178,7 @@ Adaptive slowdown (d' = {sd_pt['dprime_mean']:.2f}, {sd_pt['pct_frustrated']*100
 The Pareto-optimal set (maximising d' while minimising % frustrated) includes: {pareto_str}.""")
 ```
 
-![RQ3: d' vs. % Frustrated — Pareto Frontier](../analysis/output/rq3_pareto_scatter.png){#fig-rq3}
+![RQ3: d' vs. % Frustrated — Pareto Frontier](images/rq3_pareto_scatter.png){#fig-rq3}
 
 ### RQ4: Usage Moderation
 
@@ -191,9 +191,9 @@ print(f"""Spearman rank correlations between daily social media usage and d' wer
 All usage groups showed d' improvement over the estimated control baseline ({baseline_dp:.2f}): {usage_str}.""")
 ```
 
-![RQ4: d' Improvement by Daily Usage Group](../analysis/output/rq4_usage_dprime.png){#fig-rq4-usage}
+![RQ4: d' Improvement by Daily Usage Group](images/rq4_usage_dprime.png){#fig-rq4-usage}
 
-![RQ4: 7-Item Interface Survey Radar](../analysis/output/rq4_radar_survey.png){#fig-rq4-radar}
+![RQ4: 7-Item Interface Survey Radar](images/rq4_radar_survey.png){#fig-rq4-radar}
 
 ## Discussion
 
