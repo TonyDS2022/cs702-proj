@@ -1,6 +1,9 @@
 project:
   type: website
 
+execute:
+  freeze: auto
+
 website:
   title: "[TBD] Frictions Frequency and Modality vs User Satifaction"
   navbar:
@@ -8,6 +11,7 @@ website:
       - href: index.qmd
         text: Home
       - proposal.qmd
+      - report.qmd
 
 format:
   html:
